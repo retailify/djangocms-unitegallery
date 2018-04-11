@@ -1,1 +1,29 @@
-now the easythumbnail gallery
+{% load static cms_tags sekizai_tags thumbnail %}
+
+<div id="gallery_{{ gallery.pk }}" style="display:hidden;" class="unitegallery{% if gallery.custom_classes %} {{ gallery.custom_classes }}{% endif %}">
+{% for photo in gallery.photos.all %}
+  {% if CONFIG.THUMBNAIL_ENABLED %}
+    <img src="{% thumbnail photo.image photo.get_thumbnail_size crop="center"  %}" alt="{{ photo.title }}" data-image="{{ photo.image.url }}"{% if photo.description %} data-description="{{ photo.description }}"{% endif %} class="unitegallery-photo{% if photo.custom_classes %} {{ photo.custom_classes }}{% endif %}">
+  {% else %}
+    {% with photo.image as im %}
+    <img src="{{ im.url }}" alt="{{ photo.title }}" data-image="{{ photo.image.url }}"{% if photo.description %} data-description="{{ photo.description }}"{% endif %} class="unitegallery-photo{% if photo.custom_classes %} {{ photo.custom_classes }}{% endif %}">
+    {% endwith %}
+  {% endif %}
+{% endfor %}
+</div>
+
+{% static "djangocms_unitegallery" as baseurl %}
+{% addtoblock "css" %}
+<link rel="stylesheet" href="{{ baseurl }}/unitegallery/css/unite-gallery.css" type="text/css" />
+{% endaddtoblock %}
+{% addtoblock "js" %}
+<script type="text/javascript" src="{{ baseurl }}/unitegallery/js/unitegallery.min.js"></script>
+<script type="text/javascript" src="{{ baseurl }}/unitegallery/themes/{{ gallery.theme }}/ug-theme-{{ gallery.theme }}.js"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
+        var options = {};
+        {% if gallery.options %}jQuery.extend(options, {{ gallery.options|safe }});{% endif %}
+        $("#gallery_{{ gallery.pk }}").unitegallery(options);
+    });
+</script>
+{% endaddtoblock %}
